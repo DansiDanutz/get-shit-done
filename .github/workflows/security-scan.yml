@@ -1,6 +1,7 @@
 name: Security Scan
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -40,28 +41,28 @@ jobs:
 
       - name: Prompt injection scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/prompt-injection-scan.sh
           scripts/prompt-injection-scan.sh --diff "origin/$BASE_REF"
 
       - name: Base64 obfuscation scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/base64-scan.sh
           scripts/base64-scan.sh --diff "origin/$BASE_REF"
 
       - name: Secret scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/secret-scan.sh
           scripts/secret-scan.sh --diff "origin/$BASE_REF"
 
       - name: Planning directory check
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           # Ensure .planning/ runtime data is not committed in PRs
           # (The GSD repo itself has .planning/ in .gitignore, but PRs

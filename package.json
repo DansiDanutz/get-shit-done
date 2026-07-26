@@ -52,8 +52,14 @@
     "ws": "^8.21.1"
   },
   "overrides": {
+    "@anthropic-ai/sdk": "0.91.1",
+    "@hono/node-server": "2.0.12",
+    "body-parser": "2.3.0",
+    "express-rate-limit": "8.6.0",
     "fast-uri": "3.1.4",
-    "hono": "4.12.32"
+    "hono": "4.12.32",
+    "ip-address": "10.3.1",
+    "qs": "6.15.3"
   },
   "devDependencies": {
     "c8": "^11.0.0"

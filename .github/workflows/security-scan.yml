@@ -1,6 +1,7 @@
 name: Security Scan
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -22,30 +23,46 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            sdk/package-lock.json
+
+      - name: Audit published dependency graphs
+        run: |
+          npm ci --ignore-scripts
+          npm audit --omit=dev --audit-level=high
+          npm --prefix sdk ci --ignore-scripts
+          npm --prefix sdk audit --omit=dev --audit-level=high
+
       - name: Prompt injection scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/prompt-injection-scan.sh
           scripts/prompt-injection-scan.sh --diff "origin/$BASE_REF"
 
       - name: Base64 obfuscation scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/base64-scan.sh
           scripts/base64-scan.sh --diff "origin/$BASE_REF"
 
       - name: Secret scan
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           chmod +x scripts/secret-scan.sh
           scripts/secret-scan.sh --diff "origin/$BASE_REF"
 
       - name: Planning directory check
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
           # Ensure .planning/ runtime data is not committed in PRs
           # (The GSD repo itself has .planning/ in .gitignore, but PRs
